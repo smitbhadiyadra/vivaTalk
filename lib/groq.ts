@@ -109,12 +109,12 @@ Be inspiring, energetic, and collaborative. Ask thought-provoking questions that
 
 // Enhanced fallback responses for each conversation type
 const getFallbackResponse = (conversationType: string): string => {
-  const fallbacks = {
+  const fallbacks: Record<string, string> = {
     therapy: "I'm here to listen and support you. While I'm experiencing some technical difficulties right now, I want you to know that your feelings and experiences are valid. What's been on your mind lately that you'd like to talk about?",
     expert: "I'm here to provide professional guidance and insights. Although I'm having some technical issues at the moment, I'm committed to helping you with your business or career questions. What specific challenge or opportunity would you like to explore?",
     companion: "Hey there! I'm so glad you're here to chat with me. I'm having a small technical hiccup right now, but I'm still here for you. What's been going on in your world? I'd love to hear about your day!",
     creative: "I'm excited to collaborate with you on creative projects! Even though I'm experiencing some technical difficulties, my creative energy is still flowing. What creative challenge or project are you working on? Let's brainstorm together!"
-  } as Record<string, string>;
+  };
   
   return fallbacks[conversationType] || "I'm here to help you, though I'm experiencing some technical difficulties. Please tell me what's on your mind, and I'll do my best to assist you.";
 };
@@ -128,14 +128,14 @@ export async function generateConversationIntro(conversationType: string): Promi
 
   if (!groq) {
     console.warn('⚠️ Groq client not available, using enhanced fallback intro');
-    const enhancedIntros = {
+    const enhancedIntros: Record<string, string> = {
       therapy: "Hello, I'm Dr. Sarah, your AI therapist. I'm here to provide a safe, supportive space where you can explore your thoughts and feelings without judgment. Whether you're dealing with stress, anxiety, relationship challenges, or just need someone to talk to, I'm here to listen and guide you. How are you feeling today, and what would you like to explore together?",
       expert: "Welcome! I'm Alex, your AI business and industry expert. With extensive experience across technology, strategy, and professional development, I'm here to provide practical insights and actionable advice. Whether you need guidance on career advancement, business strategy, or navigating professional challenges, I'm ready to help. What specific area would you like to focus on today?",
       companion: "Hi there! I'm Jamie, and I'm so happy you're here! Think of me as your friendly AI companion who's always excited to chat, listen, and share in whatever's happening in your life. Whether you want to celebrate something awesome, work through a challenge, or just have a casual conversation, I'm here for it all. What's been on your mind lately?",
       creative: "Hey creative soul! I'm Morgan, your AI creative collaborator, and I'm absolutely thrilled to work with you! Whether you're brainstorming a new project, overcoming a creative block, or exploring wild new ideas, I'm here to spark inspiration and help bring your vision to life. What creative adventure shall we embark on today?"
     };
     
-    return enhancedIntros[conversationType as keyof typeof enhancedIntros] || 'Welcome! I\'m here to help you with whatever you\'d like to discuss.';
+    return enhancedIntros[conversationType] || 'Welcome! I\'m here to help you with whatever you\'d like to discuss.';
   }
 
   try {
@@ -152,7 +152,7 @@ export async function generateConversationIntro(conversationType: string): Promi
           content: 'Please introduce yourself and welcome me to our conversation. Be warm, professional, and set the tone for our interaction based on your role. Make it personal and engaging.'
         }
       ],
-      model: 'compound-beta',
+      model: 'llama-3.1-70b-versatile',
       temperature: 0.8,
       max_tokens: 300,
       top_p: 0.9,
@@ -202,7 +202,7 @@ export async function generateAIResponse(
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [systemMessage, ...recentMessages],
-      model: 'compound-beta',
+      model: 'llama-3.1-70b-versatile',
       temperature: 0.7,
       max_tokens: 1024,
       top_p: 0.9,
@@ -262,7 +262,7 @@ export async function generateStreamingResponse(
   try {
     const chatCompletion = await groq.chat.completions.create({
       messages: [systemMessage, ...recentMessages],
-      model: 'compound-beta',
+      model: 'llama-3.1-70b-versatile',
       temperature: 0.7,
       max_tokens: 1024,
       top_p: 0.9,

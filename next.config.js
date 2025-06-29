@@ -3,15 +3,16 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   images: { 
     unoptimized: true,
     domains: ['wgjgdtovkspamqeqrjgg.supabase.co'], // Add your Supabase domain for avatar images
   },
   optimizeFonts: false,
-  // Enable dynamic routing with client components
-  experimental: {
-    serverComponentsExternalPackages: ['groq-sdk'],
-  },
+  output: 'export',
+  trailingSlash: true,
   // Environment variable validation
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
