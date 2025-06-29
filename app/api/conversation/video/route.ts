@@ -1,46 +1,93 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { tavusAPI, generateConversationName, createConversationalContext, getVideoErrorMessage, getReplicaName } from '@/lib/tavus';
 import { generateConversationIntro, conversationTypes } from '@/lib/groq';
+import { 
+  rateLimit, 
+  getClientIdentifier, 
+  validateOrigin, 
+  sanitizeInput,
+  createSecureResponse 
+} from '@/lib/api-security';
+
+// Rate limiting: 2 video requests per 5 minutes per user (more restrictive due to cost)
+const videoRateLimit = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  maxRequests: 2
+});
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🎥 Video API called');
     
-    const { conversationType, userName } = await request.json();
+    // Security checks
+    if (!validateOrigin(request)) {
+      console.error('❌ Invalid origin');
+      return createSecureResponse(
+        { error: 'Forbidden', details: 'Invalid origin' },
+        403
+      );
+    }
+
+    // Rate limiting (more restrictive for video)
+    const clientId = getClientIdentifier(request);
+    if (!videoRateLimit(clientId)) {
+      console.error('❌ Video rate limit exceeded for:', clientId);
+      return createSecureResponse(
+        { 
+          error: 'Too many video requests',
+          details: 'Please wait 5 minutes before creating another video conversation'
+        },
+        429
+      );
+    }
+
+    const body = await request.json();
+    const { conversationType, userName } = sanitizeInput(body);
     console.log('📝 Video request:', { conversationType, userName });
 
     // Enhanced validation
     if (!conversationType) {
       console.error('❌ Missing conversation type');
-      return NextResponse.json(
+      return createSecureResponse(
         { 
           error: 'Conversation type is required',
           details: 'Please specify the type of conversation (therapy, expert, companion, creative)'
         },
-        { status: 400 }
+        400
       );
     }
 
     if (!conversationTypes[conversationType]) {
       console.error('❌ Invalid conversation type:', conversationType);
-      return NextResponse.json(
+      return createSecureResponse(
         { 
           error: 'Invalid conversation type',
           details: `Supported types: ${Object.keys(conversationTypes).join(', ')}`
         },
-        { status: 400 }
+        400
+      );
+    }
+
+    // Validate userName length
+    if (userName && userName.length > 50) {
+      return createSecureResponse(
+        { 
+          error: 'Invalid user name',
+          details: 'User name must be less than 50 characters'
+        },
+        400
       );
     }
 
     // Check if Tavus API is available
     if (!tavusAPI) {
       console.error('❌ Tavus API not configured');
-      return NextResponse.json(
+      return createSecureResponse(
         { 
           error: 'Video conversations are not available',
-          details: 'Tavus API key is not configured. Please add your TAVUS_API_KEY to the environment variables.'
+          details: 'Video service is not configured. Please try text chat instead.'
         },
-        { status: 503 }
+        503
       );
     }
 
@@ -48,12 +95,12 @@ export async function POST(request: NextRequest) {
     const replicaId = process.env.TAVUS_REPLICA_ID;
     if (!replicaId) {
       console.error('❌ Tavus Replica ID not configured');
-      return NextResponse.json(
+      return createSecureResponse(
         { 
           error: 'Video conversations are not available',
-          details: 'Tavus Replica ID is not configured. Please add your TAVUS_REPLICA_ID to the environment variables.'
+          details: 'Video service is not properly configured. Please try text chat instead.'
         },
-        { status: 503 }
+        503
       );
     }
 
@@ -94,7 +141,7 @@ export async function POST(request: NextRequest) {
       conversational_context: conversationalContext,
       custom_greeting: groqIntro,
       properties: {
-        max_call_duration: 3600, // 1 hour
+        max_call_duration: 1800, // 30 minutes (reduced from 1 hour)
         participant_left_timeout: 120, // 2 minutes
         participant_absent_timeout: 300, // 5 minutes
         enable_recording: false, // Disabled for privacy
@@ -118,7 +165,7 @@ export async function POST(request: NextRequest) {
       url: tavusResponse.conversation_url
     });
 
-    return NextResponse.json({
+    return createSecureResponse({
       conversation_id: tavusResponse.conversation_id,
       conversation_url: tavusResponse.conversation_url,
       conversation_name: tavusResponse.conversation_name,
@@ -151,13 +198,28 @@ export async function POST(request: NextRequest) {
       statusCode = 504;
     }
     
-    return NextResponse.json(
+    return createSecureResponse(
       { 
         error: 'Failed to create video conversation',
         details: errorMessage,
         timestamp: new Date().toISOString()
       },
-      { status: statusCode }
+      statusCode
     );
   }
+}
+
+// Handle preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
+        ? 'https://vivatalk.netlify.app' 
+        : 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
 }

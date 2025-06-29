@@ -1,33 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateConversationIntro, conversationTypes } from '@/lib/groq';
+import { 
+  rateLimit, 
+  getClientIdentifier, 
+  validateOrigin, 
+  sanitizeInput,
+  createSecureResponse 
+} from '@/lib/api-security';
+
+// Rate limiting: 5 requests per minute per user for intros
+const introRateLimit = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  maxRequests: 5
+});
 
 export async function POST(request: NextRequest) {
   try {
     console.log('🚀 Intro API called');
     
-    const { conversationType } = await request.json();
+    // Security checks
+    if (!validateOrigin(request)) {
+      console.error('❌ Invalid origin');
+      return createSecureResponse(
+        { error: 'Forbidden', details: 'Invalid origin' },
+        403
+      );
+    }
+
+    // Rate limiting
+    const clientId = getClientIdentifier(request);
+    if (!introRateLimit(clientId)) {
+      console.error('❌ Rate limit exceeded for intro:', clientId);
+      return createSecureResponse(
+        { 
+          error: 'Too many requests',
+          details: 'Please wait before requesting another introduction'
+        },
+        429
+      );
+    }
+
+    const body = await request.json();
+    const { conversationType } = sanitizeInput(body);
     console.log('📝 Conversation type:', conversationType);
 
     // Enhanced validation
     if (!conversationType) {
       console.error('❌ Missing conversation type');
-      return NextResponse.json(
+      return createSecureResponse(
         { 
           error: 'Conversation type is required',
           details: 'Please specify the type of conversation (therapy, expert, companion, creative)'
         },
-        { status: 400 }
+        400
       );
     }
 
     if (!conversationTypes[conversationType]) {
       console.error('❌ Invalid conversation type:', conversationType);
-      return NextResponse.json(
+      return createSecureResponse(
         { 
           error: 'Invalid conversation type',
           details: `Supported types: ${Object.keys(conversationTypes).join(', ')}`
         },
-        { status: 400 }
+        400
       );
     }
 
@@ -41,7 +77,7 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ Groq intro generated:', intro.substring(0, 100) + '...');
 
-    return NextResponse.json({ intro });
+    return createSecureResponse({ intro });
   } catch (error: any) {
     console.error('❌ Error in conversation intro API:', error);
     
@@ -74,13 +110,28 @@ export async function POST(request: NextRequest) {
       errorDetails = 'The AI service took too long to respond. Please try again.';
     }
     
-    return NextResponse.json(
+    return createSecureResponse(
       { 
         error: errorMessage,
         details: errorDetails,
         timestamp: new Date().toISOString()
       },
-      { status: statusCode }
+      statusCode
     );
   }
+}
+
+// Handle preflight requests
+export async function OPTIONS(request: NextRequest) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': process.env.NODE_ENV === 'production' 
+        ? 'https://vivatalk.netlify.app' 
+        : 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
 }
