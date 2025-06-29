@@ -114,7 +114,7 @@ const getFallbackResponse = (conversationType: string): string => {
     expert: "I'm here to provide professional guidance and insights. Although I'm having some technical issues at the moment, I'm committed to helping you with your business or career questions. What specific challenge or opportunity would you like to explore?",
     companion: "Hey there! I'm so glad you're here to chat with me. I'm having a small technical hiccup right now, but I'm still here for you. What's been going on in your world? I'd love to hear about your day!",
     creative: "I'm excited to collaborate with you on creative projects! Even though I'm experiencing some technical difficulties, my creative energy is still flowing. What creative challenge or project are you working on? Let's brainstorm together!"
-  };
+  } as Record<string, string>;
   
   return fallbacks[conversationType] || "I'm here to help you, though I'm experiencing some technical difficulties. Please tell me what's on your mind, and I'll do my best to assist you.";
 };
