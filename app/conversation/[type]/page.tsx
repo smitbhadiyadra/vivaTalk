@@ -401,46 +401,48 @@ export default function ConversationPage() {
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
-      {/* Fixed Header */}
+      {/* Mobile-Optimized Header */}
       <div className="flex-shrink-0 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {/* Header */}
+        <div className="px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
+          {/* Mobile Header Layout */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="flex items-center justify-between"
           >
-            <div className="flex items-center space-x-4">
+            {/* Left side - Back button and title */}
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => router.push('/talk')}
-                className="hover:bg-muted"
+                className="hover:bg-muted flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <div className={`absolute inset-0 bg-gradient-to-r ${colorClass} rounded-xl blur-lg opacity-30`} />
-                  <div className={`relative bg-gradient-to-r ${colorClass} w-12 h-12 rounded-xl flex items-center justify-center`}>
-                    <Icon className="h-6 w-6 text-white" />
+              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                <div className="relative flex-shrink-0">
+                  <div className={`absolute inset-0 bg-gradient-to-r ${colorClass} rounded-lg sm:rounded-xl blur-lg opacity-30`} />
+                  <div className={`relative bg-gradient-to-r ${colorClass} w-8 h-8 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl flex items-center justify-center`}>
+                    <Icon className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                   </div>
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold">{currentType.title}</h1>
-                  <p className="text-muted-foreground">{currentType.description}</p>
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-lg sm:text-2xl font-bold truncate">{currentType.title}</h1>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate hidden sm:block">{currentType.description}</p>
                 </div>
               </div>
             </div>
 
-            {/* Enhanced Video Conversation Option */}
+            {/* Right side - Video button (hidden on small screens when video exists) */}
             {showVideoOption && (
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
+                className="flex-shrink-0 ml-2"
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
@@ -449,8 +451,8 @@ export default function ConversationPage() {
                   <Button
                     onClick={createVideoConversation}
                     disabled={isCreatingVideo}
-                    className={`bg-gradient-to-r ${colorClass} hover:opacity-90 text-white relative overflow-hidden group`}
-                    size="lg"
+                    className={`bg-gradient-to-r ${colorClass} hover:opacity-90 text-white relative overflow-hidden group text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10`}
+                    size="sm"
                   >
                     <AnimatePresence mode="wait">
                       {isCreatingVideo ? (
@@ -461,8 +463,8 @@ export default function ConversationPage() {
                           exit={{ opacity: 0 }}
                           className="flex items-center"
                         >
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating Video...
+                          <Loader2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+                          <span className="hidden sm:inline">Creating...</span>
                         </motion.div>
                       ) : (
                         <motion.div
@@ -472,33 +474,25 @@ export default function ConversationPage() {
                           exit={{ opacity: 0 }}
                           className="flex items-center"
                         >
-                          <Video className="mr-2 h-4 w-4" />
-                          Start Video Chat
-                          <Rocket className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                          <Video className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">Video</span>
+                          <Rocket className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    
-                    {/* Animated background effect */}
-                    <motion.div
-                      className="absolute inset-0 bg-white/20"
-                      initial={{ x: '-100%' }}
-                      whileHover={{ x: '100%' }}
-                      transition={{ duration: 0.6 }}
-                    />
                   </Button>
                 </motion.div>
               </motion.div>
             )}
           </motion.div>
 
-          {/* Enhanced Video Conversation Link */}
+          {/* Mobile Video Conversation Link */}
           {videoConversation && (
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.6, type: "spring", stiffness: 200 }}
-              className="mt-4"
+              className="mt-3 sm:mt-4"
             >
               <Card className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800 overflow-hidden relative">
                 <motion.div
@@ -506,21 +500,21 @@ export default function ConversationPage() {
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 />
-                <CardContent className="p-6 relative">
+                <CardContent className="p-3 sm:p-6 relative">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
                       <motion.div
-                        className="bg-green-100 dark:bg-green-900/50 p-3 rounded-xl"
+                        className="bg-green-100 dark:bg-green-900/50 p-2 sm:p-3 rounded-lg sm:rounded-xl flex-shrink-0"
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <Video className="h-6 w-6 text-green-600 dark:text-green-400" />
+                        <Video className="h-4 w-4 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
                       </motion.div>
-                      <div>
-                        <h3 className="font-semibold text-green-800 dark:text-green-200 text-lg">
-                          🎉 Video Conversation Ready!
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold text-green-800 dark:text-green-200 text-sm sm:text-lg">
+                          🎉 Video Ready!
                         </h3>
-                        <p className="text-sm text-green-600 dark:text-green-300">
+                        <p className="text-xs sm:text-sm text-green-600 dark:text-green-300 truncate">
                           {videoConversation.replica_name ? `Chat with ${videoConversation.replica_name}` : videoConversation.conversation_name}
                         </p>
                       </div>
@@ -528,11 +522,12 @@ export default function ConversationPage() {
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      className="flex-shrink-0"
                     >
                       <Button
                         asChild
-                        className="bg-green-600 hover:bg-green-700 text-white relative overflow-hidden group"
-                        size="lg"
+                        className="bg-green-600 hover:bg-green-700 text-white relative overflow-hidden group text-xs sm:text-sm px-2 sm:px-4 h-8 sm:h-10"
+                        size="sm"
                       >
                         <a 
                           href={videoConversation.conversation_url} 
@@ -540,17 +535,9 @@ export default function ConversationPage() {
                           rel="noopener noreferrer"
                           className="flex items-center"
                         >
-                          <ExternalLink className="mr-2 h-4 w-4" />
-                          Join Video Call
-                          <Zap className="ml-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
-                          
-                          {/* Shine effect */}
-                          <motion.div
-                            className="absolute inset-0 bg-white/20"
-                            initial={{ x: '-100%' }}
-                            whileHover={{ x: '100%' }}
-                            transition={{ duration: 0.6 }}
-                          />
+                          <ExternalLink className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="hidden sm:inline">Join</span>
+                          <Zap className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 group-hover:rotate-12 transition-transform" />
                         </a>
                       </Button>
                     </motion.div>
@@ -562,8 +549,8 @@ export default function ConversationPage() {
         </div>
       </div>
 
-      {/* Chat Container - Flexible height that fills remaining space */}
-      <div className="flex-1 flex flex-col min-h-0 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Chat Container - Mobile Optimized */}
+      <div className="flex-1 flex flex-col min-h-0 px-3 sm:px-4 lg:px-8 py-4 sm:py-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -571,11 +558,11 @@ export default function ConversationPage() {
           className="flex-1 flex flex-col min-h-0 max-w-4xl mx-auto w-full"
         >
           <Card className="flex-1 flex flex-col min-h-0 bg-card/80 backdrop-blur-sm border-0 shadow-xl">
-            {/* Messages - Scrollable area with flexible height */}
+            {/* Messages - Mobile Optimized Scrollable Area */}
             <div className="flex-1 min-h-0 overflow-hidden">
               <CardContent 
                 ref={messagesContainerRef}
-                className="h-full overflow-y-auto p-6 space-y-4 scroll-smooth"
+                className="h-full overflow-y-auto p-3 sm:p-6 space-y-3 sm:space-y-4 scroll-smooth"
               >
                 <AnimatePresence>
                   {messages.map((message) => (
@@ -587,25 +574,25 @@ export default function ConversationPage() {
                       transition={{ duration: 0.3 }}
                       className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`flex items-start space-x-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                        <Avatar className="h-8 w-8 flex-shrink-0">
+                      <div className={`flex items-start space-x-2 sm:space-x-3 max-w-[85%] sm:max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                        <Avatar className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
                           {message.role === 'user' ? (
                             <AvatarImage src={user.user_metadata?.avatar_url} />
                           ) : (
                             <div className={`w-full h-full bg-gradient-to-r ${colorClass} flex items-center justify-center`}>
-                              <Icon className="h-4 w-4 text-white" />
+                              <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                             </div>
                           )}
                           <AvatarFallback>
                             {message.role === 'user' 
                               ? user.email?.charAt(0).toUpperCase() 
-                              : <Icon className="h-4 w-4" />
+                              : <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                             }
                           </AvatarFallback>
                         </Avatar>
                         
                         <motion.div 
-                          className={`rounded-2xl px-4 py-3 ${
+                          className={`rounded-2xl px-3 py-2 sm:px-4 sm:py-3 ${
                             message.role === 'user' 
                               ? 'bg-primary text-primary-foreground' 
                               : 'bg-muted'
@@ -613,10 +600,10 @@ export default function ConversationPage() {
                           whileHover={{ scale: 1.02 }}
                           transition={{ duration: 0.2 }}
                         >
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap break-words">
                             {message.content}
                           </p>
-                          <div className="text-xs opacity-70 mt-2">
+                          <div className="text-xs opacity-70 mt-1 sm:mt-2">
                             {message.timestamp.toLocaleTimeString([], { 
                               hour: '2-digit', 
                               minute: '2-digit' 
@@ -634,21 +621,21 @@ export default function ConversationPage() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex justify-start"
                   >
-                    <div className="flex items-start space-x-3 max-w-[80%]">
-                      <Avatar className="h-8 w-8 flex-shrink-0">
+                    <div className="flex items-start space-x-2 sm:space-x-3 max-w-[80%]">
+                      <Avatar className="h-6 w-6 sm:h-8 sm:w-8 flex-shrink-0">
                         <div className={`w-full h-full bg-gradient-to-r ${colorClass} flex items-center justify-center`}>
-                          <Icon className="h-4 w-4 text-white" />
+                          <Icon className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                         </div>
                       </Avatar>
-                      <div className="bg-muted rounded-2xl px-4 py-3">
+                      <div className="bg-muted rounded-2xl px-3 py-2 sm:px-4 sm:py-3">
                         <div className="flex items-center space-x-2">
                           <motion.div
                             animate={{ rotate: 360 }}
                             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           >
-                            <Loader2 className="h-4 w-4" />
+                            <Loader2 className="h-3 w-3 sm:h-4 sm:w-4" />
                           </motion.div>
-                          <span className="text-sm">Thinking...</span>
+                          <span className="text-xs sm:text-sm">Thinking...</span>
                         </div>
                       </div>
                     </div>
@@ -659,8 +646,8 @@ export default function ConversationPage() {
               </CardContent>
             </div>
 
-            {/* Enhanced Input - Fixed at bottom */}
-            <div className="flex-shrink-0 border-t border-border p-4">
+            {/* Mobile-Optimized Input */}
+            <div className="flex-shrink-0 border-t border-border p-3 sm:p-4">
               <div className="flex items-center space-x-2">
                 <div className="flex-1 relative">
                   <Input
@@ -669,7 +656,7 @@ export default function ConversationPage() {
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
                     disabled={isLoading}
-                    className="pr-12"
+                    className="pr-10 sm:pr-12 text-sm sm:text-base"
                   />
                   <motion.div
                     whileHover={{ scale: 1.1 }}
@@ -680,15 +667,15 @@ export default function ConversationPage() {
                       size="icon"
                       variant="ghost"
                       onClick={toggleSpeechRecognition}
-                      className={`absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 ${
+                      className={`absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 sm:h-8 sm:w-8 ${
                         isListening ? 'text-red-500 animate-pulse' : 'text-muted-foreground'
                       }`}
                       disabled={isLoading}
                     >
                       {isListening ? (
-                        <MicOff className="h-4 w-4" />
+                        <MicOff className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <Mic className="h-4 w-4" />
+                        <Mic className="h-3 w-3 sm:h-4 sm:w-4" />
                       )}
                     </Button>
                   </motion.div>
@@ -700,18 +687,19 @@ export default function ConversationPage() {
                   <Button
                     onClick={sendMessage}
                     disabled={!inputMessage.trim() || isLoading}
-                    className={`bg-gradient-to-r ${colorClass} hover:opacity-90 relative overflow-hidden group`}
+                    className={`bg-gradient-to-r ${colorClass} hover:opacity-90 relative overflow-hidden group h-8 w-8 sm:h-10 sm:w-10`}
+                    size="icon"
                   >
                     {isLoading ? (
                       <motion.div
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       >
-                        <Loader2 className="h-4 w-4" />
+                        <Loader2 className="h-3 w-3 sm:h-4 sm:w-4" />
                       </motion.div>
                     ) : (
                       <>
-                        <Send className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        <Send className="h-3 w-3 sm:h-4 sm:w-4 group-hover:translate-x-1 transition-transform" />
                         {/* Shine effect */}
                         <motion.div
                           className="absolute inset-0 bg-white/20"
